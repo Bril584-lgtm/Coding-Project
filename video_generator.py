@@ -1,4 +1,5 @@
 import os
+import sys
 import textwrap
 import tempfile
 from pathlib import Path
@@ -41,14 +42,34 @@ def _make_gradient_bg(color_start: tuple, color_end: tuple) -> np.ndarray:
 
 
 def _get_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
-    font_paths = [
-        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-        "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
-        "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf" if bold else "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
-    ]
-    for path in font_paths:
+    if sys.platform == "win32":
+        win_fonts = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
+        candidates = [
+            os.path.join(win_fonts, "arialbd.ttf" if bold else "arial.ttf"),
+            os.path.join(win_fonts, "verdanab.ttf" if bold else "verdana.ttf"),
+            os.path.join(win_fonts, "calibrib.ttf" if bold else "calibri.ttf"),
+            os.path.join(win_fonts, "trebucbd.ttf" if bold else "trebuc.ttf"),
+        ]
+    elif sys.platform == "darwin":
+        candidates = [
+            "/Library/Fonts/Arial Bold.ttf" if bold else "/Library/Fonts/Arial.ttf",
+            "/System/Library/Fonts/Supplemental/Arial Bold.ttf" if bold else "/System/Library/Fonts/Supplemental/Arial.ttf",
+            "/Library/Fonts/Microsoft/Arial Bold.ttf" if bold else "/Library/Fonts/Microsoft/Arial.ttf",
+            "/System/Library/Fonts/Helvetica.ttc",
+        ]
+    else:
+        candidates = [
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+            "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf" if bold else "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
+            "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf" if bold else "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf",
+        ]
+
+    for path in candidates:
         if os.path.exists(path):
             return ImageFont.truetype(path, size)
+
+    # Last resort: Pillow's bundled bitmap font (no size control, but always works)
     return ImageFont.load_default()
 
 
