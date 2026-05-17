@@ -1,6 +1,8 @@
-# TikTok AI Quote Video Auto Poster
+# Numper — AI Quote Video Auto Poster (Prototype)
 
-Automatically generates motivational quote videos and posts them to TikTok.
+> ⚠️ **This is a prototype and personal experiment — not an official or production-ready tool.**
+
+Automatically generates motivational quote videos and posts them to TikTok and YouTube Shorts.
 Works on **Windows 10/11**, **macOS**, and **Linux**.
 
 No prior coding experience required — follow the steps below exactly.

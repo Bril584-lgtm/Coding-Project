@@ -6,3 +6,5 @@ __pycache__/
 *.pyo
 .DS_Store
 Thumbs.db
+client_secrets.json
+youtube_token.json
