@@ -27,6 +27,11 @@ VIDEO_WIDTH = 1080
 VIDEO_HEIGHT = 1920
 FPS = 30
 
+# Video length limits (seconds)
+MIN_DURATION = 15.0
+MAX_DURATION = 30.0
+FADE_DURATION = 1.0  # fade-in and fade-out length
+
 # Color themes (background_start, background_end, text_color, author_color)
 THEMES = [
     ((15, 15, 35), (40, 0, 80), (255, 255, 255), (180, 180, 255)),
@@ -163,6 +168,15 @@ def _generate_voiceover(text: str, output_path: str, use_elevenlabs: bool = Fals
         tts.save(output_path)
 
 
+def _fade_alpha(t: float, total: float) -> float:
+    """Returns opacity 0→1 at start, 1→0 at end, 1.0 in the middle."""
+    if t < FADE_DURATION:
+        return t / FADE_DURATION
+    if t > total - FADE_DURATION:
+        return max(0.0, (total - t) / FADE_DURATION)
+    return 1.0
+
+
 def generate_video(quote: str, author: str, output_path: str, theme_index: int = 0) -> str:
     """Generate a TikTok-formatted motivational quote video. Returns the output path."""
 
@@ -173,11 +187,19 @@ def generate_video(quote: str, author: str, output_path: str, theme_index: int =
         _generate_voiceover(spoken_text, audio_path, use_elevenlabs=bool(os.getenv("ELEVENLABS_API_KEY")))
 
         audio_clip = AudioFileClip(audio_path)
-        duration = audio_clip.duration + 1.5  # slight padding
+
+        # Clamp total video length to 15–30 seconds.
+        # Audio plays first; remaining time holds the quote on screen.
+        duration = float(np.clip(audio_clip.duration + 3.0, MIN_DURATION, MAX_DURATION))
+        print(f"Video duration: {duration:.1f}s  (audio: {audio_clip.duration:.1f}s)")
 
         def make_frame(t: float) -> np.ndarray:
             progress = min(t / duration, 1.0)
-            return _draw_text_frame(quote, author, theme_index, progress)
+            frame = _draw_text_frame(quote, author, theme_index, progress)
+            alpha = _fade_alpha(t, duration)
+            if alpha < 1.0:
+                frame = (frame.astype(np.float32) * alpha).astype(np.uint8)
+            return frame
 
         video_clip = ImageClip(make_frame(0)).set_duration(duration)
         video_clip = video_clip.set_make_frame(make_frame)
