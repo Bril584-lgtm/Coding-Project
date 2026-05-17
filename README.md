@@ -29,18 +29,27 @@ No prior coding experience required — follow the steps below exactly.
 
 Python is the programming language this runs on. You need version **3.9 or newer**.
 
-### Windows
+### Windows 10 / Windows 11
+
+> **Before you start — important Windows gotcha:**
+> On Windows 10 and 11, typing `python` in the Command Prompt might open the **Microsoft Store** instead of running Python. This means Python is **not** installed yet. Do **not** install Python from the Store — follow the steps below instead.
 
 1. Go to **https://www.python.org/downloads/**
-2. Click the big yellow **Download Python** button
-3. Run the installer
-4. **IMPORTANT:** On the first screen, check the box that says **"Add Python to PATH"** before clicking Install
-5. Click **Install Now** and wait for it to finish
-6. Open **Command Prompt** (search "cmd" in the Start menu) and type:
+2. Click the big yellow **Download Python 3.x.x** button
+3. Run the downloaded `.exe` installer
+4. **CRITICAL — do not skip this:** On the very first screen of the installer, at the bottom, check the box that says **"Add Python to PATH"**
+
+   ![Add Python to PATH checkbox must be checked]
+
+5. Click **Install Now** and wait for it to finish (about 1–2 minutes)
+6. Click **Close** when done
+7. Verify it worked — open **Command Prompt** (press `Windows key`, type `cmd`, press Enter) and run:
    ```
    python --version
    ```
-   You should see something like `Python 3.12.x`. If you do, Python is installed correctly.
+   You should see `Python 3.x.x`. If you see an error or the Store opens, restart your computer and try again.
+
+> **If you already have Python but it's older than 3.9:** Download and install the latest version from python.org. Multiple versions can coexist safely.
 
 ### macOS
 
@@ -111,16 +120,25 @@ cd Coding-Project
 
 This installs everything automatically. **You only do this once.**
 
-### Windows
+### Windows 10 / Windows 11
 
-1. Open the project folder in File Explorer
+1. Open the project folder in **File Explorer**
 2. Double-click **`setup.bat`**
-3. A black Command Prompt window will open and install everything
-4. Wait until it says "Setup complete!" — this takes 2–5 minutes
-5. Press any key to close
+3. A black Command Prompt window opens and installs everything automatically
+4. Wait until it says **"Setup complete!"** — this takes 2–5 minutes depending on your internet speed
+5. Press any key to close the window
 
-> If Windows asks "Do you want to allow this app to make changes?" — click **Yes**.
-> If you get a "Windows protected your PC" popup — click **More info** then **Run anyway**.
+**If you see a blue "Windows protected your PC" popup (SmartScreen):**
+- Click **"More info"** (the small text link)
+- Then click **"Run anyway"**
+- This is normal for downloaded scripts — the program is safe
+
+**If Windows asks "Do you want to allow this app to make changes to your device?":**
+- Click **Yes** — this is the standard permission prompt for running setup scripts
+
+**If the window closes instantly with an error:**
+- Right-click `setup.bat` → **Run as administrator**
+- If it still fails, open Command Prompt (`Windows key` → type `cmd` → Enter), navigate to the project folder with `cd Desktop\Coding-Project`, then type `setup.bat`
 
 ### macOS / Linux
 
@@ -372,12 +390,52 @@ The program will automatically use ElevenLabs on the next run.
 
 ## Troubleshooting
 
-### "python is not recognized" (Windows)
+### Windows: typing "python" opens the Microsoft Store
+
+Python is not installed. The Microsoft Store shortcut is just a placeholder.
+- Close the Store
+- Go to **https://www.python.org/downloads/** and download the real installer
+- During install, check **"Add Python to PATH"**
+- After install, restart your computer, then run `setup.bat` again
+
+### Windows: "python is not recognized as an internal or external command"
 
 Python isn't in your PATH. Fix:
-1. Uninstall Python from Control Panel
-2. Re-install from python.org
-3. Make sure to check **"Add Python to PATH"** during install
+1. Open **Control Panel → Apps → Apps & features**
+2. Find Python and click Uninstall
+3. Re-install from python.org — check **"Add Python to PATH"** this time
+4. Restart your computer
+
+### Windows: setup.bat closes immediately with no message
+
+Right-click `setup.bat` → **Run as administrator**. If that doesn't help:
+1. Press `Windows key`, type `cmd`, press Enter
+2. Type: `cd /d "%USERPROFILE%\Desktop\Coding-Project"` (adjust path if needed)
+3. Type: `setup.bat`
+4. Read the error message and follow the fix
+
+### Windows: "Windows protected your PC" (SmartScreen)
+
+This is normal for downloaded `.bat` files.
+- Click **"More info"**
+- Click **"Run anyway"**
+
+### Windows: antivirus blocks ffmpeg download
+
+Some antivirus software incorrectly flags the ffmpeg binary that gets downloaded automatically. Fix:
+- Temporarily disable real-time protection
+- Run `setup.bat` again
+- Re-enable protection when done
+
+### Windows: "Access is denied" or path errors
+
+The project folder might be in a protected location (like `Program Files`). Move it to your Desktop or `Documents` and run `setup.bat` again.
+
+### Windows 10: `winget` not found
+
+`winget` requires Windows 10 version 1809 or later. If you're on an older build:
+- Update Windows via **Settings → Windows Update**
+- Or install ffmpeg manually from **https://ffmpeg.org/download.html** (not needed if `imageio-ffmpeg` installed correctly)
 
 ### "Permission denied" running setup.sh (Mac/Linux)
 
@@ -388,9 +446,9 @@ bash setup.sh
 
 ### "No module named X"
 
-The packages didn't install. Run:
+The packages didn't install correctly. Run:
 ```bash
-# Windows
+# Windows (in Command Prompt)
 venv\Scripts\activate
 pip install -r requirements.txt
 
@@ -421,6 +479,10 @@ Your redirect URI doesn't match. Go to developers.tiktok.com → your app → ma
 http://localhost:8080/callback
 ```
 
+### Windows Firewall popup during auth
+
+When `auth.bat` runs, Windows may ask if Python can access the network. Click **Allow** — this is required for the TikTok login to work.
+
 ### Port 8080 already in use (auth script fails)
 
 Something else is using port 8080. Close other apps and try again, or restart your computer.
@@ -431,6 +493,8 @@ On Linux, install fonts:
 ```bash
 sudo apt install fonts-dejavu fonts-liberation
 ```
+
+On Windows, this should never happen — all required fonts ship with Windows 10/11 by default.
 
 ---
 

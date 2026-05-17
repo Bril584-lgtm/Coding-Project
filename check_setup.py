@@ -18,6 +18,8 @@ REQUIRED_PACKAGES = [
     ("dotenv", "python-dotenv"),
     ("schedule", "schedule"),
     ("numpy", "numpy"),
+    ("imageio", "imageio"),
+    ("imageio_ffmpeg", "imageio-ffmpeg"),
 ]
 
 OPTIONAL_PACKAGES = [
@@ -88,8 +90,10 @@ def main() -> None:
     print("\n--- Fonts ---")
     if sys.platform == "win32":
         win_fonts = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
-        has_font = os.path.exists(os.path.join(win_fonts, "arial.ttf"))
-        check("Arial (Windows Fonts)", has_font, "Should be present by default on Windows")
+        # Check several common fonts — Windows 10/11 always has at least one of these
+        font_candidates = ["arial.ttf", "verdana.ttf", "calibri.ttf", "segoeui.ttf", "tahoma.ttf"]
+        has_font = any(os.path.exists(os.path.join(win_fonts, f)) for f in font_candidates)
+        check("Windows system fonts", has_font, "These should always be present on Windows 10/11")
     elif sys.platform == "darwin":
         paths = ["/Library/Fonts/Arial.ttf", "/System/Library/Fonts/Supplemental/Arial.ttf"]
         has_font = any(os.path.exists(p) for p in paths)

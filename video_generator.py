@@ -56,11 +56,14 @@ def _make_gradient_bg(color_start: tuple, color_end: tuple) -> np.ndarray:
 def _get_font(size: int, bold: bool = False) -> ImageFont.FreeTypeFont:
     if sys.platform == "win32":
         win_fonts = os.path.join(os.environ.get("WINDIR", r"C:\Windows"), "Fonts")
+        # Ordered by visual quality for video text; all present on Win 10/11
         candidates = [
             os.path.join(win_fonts, "arialbd.ttf" if bold else "arial.ttf"),
+            os.path.join(win_fonts, "segoeuib.ttf" if bold else "segoeui.ttf"),   # Win 10/11 UI font
             os.path.join(win_fonts, "verdanab.ttf" if bold else "verdana.ttf"),
             os.path.join(win_fonts, "calibrib.ttf" if bold else "calibri.ttf"),
             os.path.join(win_fonts, "trebucbd.ttf" if bold else "trebuc.ttf"),
+            os.path.join(win_fonts, "tahomabd.ttf" if bold else "tahoma.ttf"),
         ]
     elif sys.platform == "darwin":
         candidates = [
