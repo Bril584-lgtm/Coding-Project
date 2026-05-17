@@ -10,8 +10,8 @@ Usage:
 import os
 import sys
 import argparse
-import tempfile
 import time
+from typing import Optional
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -26,7 +26,7 @@ load_dotenv()
 POST_TIMES = ["09:00", "14:00", "19:00"]  # 3 posts per day
 
 
-def post_one(preview_only: bool = False, theme_index: int | None = None) -> None:
+def post_one(preview_only: bool = False, theme_index: Optional[int] = None) -> None:
     quote, author = get_random_quote()
     theme = theme_index if theme_index is not None else int(time.time()) % 5
 

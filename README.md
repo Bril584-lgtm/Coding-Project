@@ -1,151 +1,471 @@
 # TikTok AI Quote Video Auto Poster
 
-Automatically generates motivational quote videos and posts them to TikTok using AI voiceover and animated text.
+Automatically generates motivational quote videos and posts them to TikTok.
+Works on **Windows 10/11**, **macOS**, and **Linux**.
+
+No prior coding experience required — follow the steps below exactly.
+
+---
 
 ## What it does
 
-- Picks a random motivational quote
-- Generates a TikTok-format (1080x1920) video with animated text and gradient background
-- Adds AI voiceover (Google TTS free, or ElevenLabs for premium voices)
-- Uploads directly to TikTok via their Content Posting API
-- Can run on a schedule (3 posts/day by default)
+- Picks a random motivational quote from a built-in library
+- Generates a 1080×1920 vertical video with a gradient background, styled text, and AI voiceover
+- Uploads directly to TikTok via their official API
+- Can post automatically on a schedule (default: 3 times per day)
 
-## Setup
+---
 
-### 1. Install Python
+## What you need before starting
 
-Requires **Python 3.9 or newer**.
+- A computer running Windows 10/11, macOS, or Linux
+- A TikTok account (regular account is fine)
+- An internet connection
+- About 15–20 minutes for first-time setup
 
-- **Windows**: Download from [python.org](https://www.python.org/downloads/) — check "Add Python to PATH" during install
-- **macOS**: `brew install python` or download from [python.org](https://www.python.org/downloads/)
-- **Linux**: `sudo apt install python3 python3-pip` (Ubuntu/Debian)
+---
 
-### 2. Install ffmpeg
+## Part 1 — Install Python
 
-ffmpeg is required to encode video files.
+Python is the programming language this runs on. You need version **3.9 or newer**.
+
+### Windows
+
+1. Go to **https://www.python.org/downloads/**
+2. Click the big yellow **Download Python** button
+3. Run the installer
+4. **IMPORTANT:** On the first screen, check the box that says **"Add Python to PATH"** before clicking Install
+5. Click **Install Now** and wait for it to finish
+6. Open **Command Prompt** (search "cmd" in the Start menu) and type:
+   ```
+   python --version
+   ```
+   You should see something like `Python 3.12.x`. If you do, Python is installed correctly.
+
+### macOS
+
+**Option A — Homebrew (recommended):**
+
+1. Open **Terminal** (search in Spotlight with Cmd+Space)
+2. Install Homebrew if you don't have it:
+   ```bash
+   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+   ```
+3. Install Python:
+   ```bash
+   brew install python
+   ```
+4. Verify:
+   ```bash
+   python3 --version
+   ```
+
+**Option B — Direct download:**
+
+1. Go to **https://www.python.org/downloads/**
+2. Download and run the macOS installer
+3. Open **Terminal** and verify:
+   ```bash
+   python3 --version
+   ```
+
+### Linux (Ubuntu / Debian)
 
 ```bash
-# Windows (pick one)
-winget install ffmpeg
-choco install ffmpeg        # if you have Chocolatey
-# Or download manually: https://ffmpeg.org/download.html → Windows builds → add to PATH
-
-# macOS
-brew install ffmpeg
-
-# Ubuntu / Debian
-sudo apt install ffmpeg
-
-# Fedora / RHEL
-sudo dnf install ffmpeg
+sudo apt update
+sudo apt install python3 python3-pip python3-venv
+python3 --version
 ```
 
-### 3. Install Python dependencies
+### Linux (Fedora / RHEL)
 
 ```bash
-pip install -r requirements.txt
+sudo dnf install python3 python3-pip
+python3 --version
 ```
 
-On Linux, if you hit font-related errors:
+---
+
+## Part 2 — Download this project
+
+### Option A — Using Git (recommended)
+
+If you have Git installed:
+
 ```bash
-sudo apt install fonts-dejavu fonts-liberation
+git clone https://github.com/Bril584-lgtm/Coding-Project.git
+cd Coding-Project
 ```
 
-### 4. Verify your setup
+### Option B — Download ZIP
 
-```bash
+1. Go to **https://github.com/Bril584-lgtm/Coding-Project**
+2. Click the green **Code** button
+3. Click **Download ZIP**
+4. Extract the ZIP file somewhere easy to find (like your Desktop)
+5. Open the extracted folder
+
+---
+
+## Part 3 — Run the setup script
+
+This installs everything automatically. **You only do this once.**
+
+### Windows
+
+1. Open the project folder in File Explorer
+2. Double-click **`setup.bat`**
+3. A black Command Prompt window will open and install everything
+4. Wait until it says "Setup complete!" — this takes 2–5 minutes
+5. Press any key to close
+
+> If Windows asks "Do you want to allow this app to make changes?" — click **Yes**.
+> If you get a "Windows protected your PC" popup — click **More info** then **Run anyway**.
+
+### macOS / Linux
+
+1. Open **Terminal**
+2. Navigate to the project folder:
+   ```bash
+   cd ~/Desktop/Coding-Project
+   ```
+   *(adjust the path to wherever you put the folder)*
+3. Run the setup script:
+   ```bash
+   bash setup.sh
+   ```
+4. Wait until it says "Setup complete!" — this takes 2–5 minutes
+
+> On Linux, the script will ask for your password to install fonts. Type it and press Enter (the password won't appear as you type — that's normal).
+
+---
+
+## Part 4 — Get TikTok API credentials
+
+This lets the program log into your TikTok account and post videos.
+
+1. Go to **https://developers.tiktok.com/** and sign in with your TikTok account
+
+2. Click **Manage apps** in the top menu
+
+3. Click **Create app**
+
+4. Fill in the form:
+   - **App name:** anything you want (e.g. "My Quote Poster")
+   - **App description:** "Automatically posts motivational quote videos"
+   - **Platform:** select **Web**
+   - **Category:** Entertainment
+
+5. After creating the app, you'll see your app dashboard. Under **Products**, find **Content Posting API** and click **Add**
+
+6. Scroll down to find **Redirect URI / Redirect domain** and add:
+   ```
+   http://localhost:8080/callback
+   ```
+   Click **Add** or **Save**
+
+7. At the top of the app dashboard, copy:
+   - **Client Key** (sometimes called "App ID")
+   - **Client Secret** (sometimes called "App Secret")
+
+   Keep these handy — you'll need them in the next step.
+
+---
+
+## Part 5 — Add your credentials to the .env file
+
+The `.env` file is where you store your private keys. **Never share this file with anyone.**
+
+1. Open the project folder
+2. Find the file named **`.env`** (it was created by the setup script)
+   - On Windows: it might be hidden. In File Explorer, go to View → check "Hidden items"
+   - On Mac: press Cmd+Shift+. to show hidden files
+3. Open it with any text editor (Notepad on Windows, TextEdit on Mac, or nano/gedit on Linux)
+4. It looks like this:
+   ```
+   TIKTOK_CLIENT_KEY=your_client_key_here
+   TIKTOK_CLIENT_SECRET=your_client_secret_here
+   TIKTOK_ACCESS_TOKEN=
+   ```
+5. Replace `your_client_key_here` with your actual Client Key
+6. Replace `your_client_secret_here` with your actual Client Secret
+7. Leave `TIKTOK_ACCESS_TOKEN=` blank for now — the next step fills it in
+8. Save the file
+
+---
+
+## Part 6 — Verify your setup
+
+Run the checker to make sure everything is installed correctly:
+
+### Windows
+Double-click **`run.bat`** and type:
+```
+python check_setup.py
+```
+Or open Command Prompt in the project folder and run:
+```
+venv\Scripts\activate
 python check_setup.py
 ```
 
-This checks Python version, packages, ffmpeg, fonts, and your `.env` — run it any time something seems off.
-
-### 5. Get TikTok API credentials
-
-1. Go to [developers.tiktok.com](https://developers.tiktok.com/) and sign in
-2. Click **Manage apps** → **Create app**
-3. Fill in app name, description, select **Web** as platform
-4. Under **Products**, add **Content Posting API**
-5. Set **Redirect URI** to `http://localhost:8080/callback`
-6. Copy your **Client Key** and **Client Secret**
-
-### 6. Configure environment
-
-**Mac / Linux:**
+### macOS / Linux
 ```bash
-cp .env.example .env
+./run.sh check_setup.py
 ```
-
-**Windows (Command Prompt):**
-```cmd
-copy .env.example .env
-```
-
-**Windows (PowerShell):**
-```powershell
-Copy-Item .env.example .env
-```
-
-Edit `.env` and add your `TIKTOK_CLIENT_KEY` and `TIKTOK_CLIENT_SECRET`.
-
-### 7. Authorize your TikTok account
-
+Or:
 ```bash
-python tiktok_auth.py
+source venv/bin/activate
+python check_setup.py
 ```
 
-This opens TikTok in your browser, you log in and approve, and your access token is saved automatically.
+Everything should say **[OK]**. Fix anything that says **[MISSING]** before continuing.
 
-### 8. Run it
+---
 
+## Part 7 — Log into TikTok
+
+This connects the program to your TikTok account. **You only do this once** (or when your token expires, typically every 24 hours for sandbox apps).
+
+### Windows
+Double-click **`auth.bat`**
+
+### macOS / Linux
 ```bash
-# Generate and post one video now
-python main.py
-
-# Preview only (no upload)
-python main.py --preview
-
-# Auto-post 3x per day on a schedule
-python main.py --schedule
-
-# Use a specific color theme (0-4)
-python main.py --theme 2
+./auth.sh
 ```
 
-## Optional Upgrades
+What happens:
+1. Your browser opens to a TikTok login page
+2. Log in with your TikTok account
+3. Click **Authorize** when TikTok asks for permission
+4. Your browser will show "Authorization successful! You can close this tab."
+5. The terminal will say your token was saved to `.env`
 
-### Better AI voices (ElevenLabs)
-1. Sign up at [elevenlabs.io](https://elevenlabs.io/) (free tier available)
-2. Copy your API key to `.env` as `ELEVENLABS_API_KEY`
+> **If the browser doesn't open automatically:** Copy the URL printed in the terminal and paste it into your browser manually.
 
-### Change posting schedule
+> **Windows Firewall popup:** If Windows asks to allow network access, click **Allow**.
 
-Edit `POST_TIMES` in `main.py`:
+---
+
+## Part 8 — Generate a test video
+
+Before posting anything publicly, generate a video locally to make sure it looks good.
+
+### Windows
+Double-click **`preview.bat`**
+
+### macOS / Linux
+```bash
+./preview.sh
+```
+
+This creates a video in the **`output_videos`** folder. Open it and watch it. If it looks good, you're ready to post.
+
+---
+
+## Part 9 — Post your first video
+
+Videos are posted as **private (only you can see them)** by default. This lets you review them on your phone before making them public.
+
+### Windows
+Double-click **`run.bat`**
+
+### macOS / Linux
+```bash
+./run.sh
+```
+
+Then:
+1. Open TikTok on your phone
+2. Go to your profile → tap the video
+3. If it looks good, tap the three dots → **Privacy** → change to **Everyone**
+
+When you're confident in the quality, you can make all future posts public automatically.
+Open `tiktok_uploader.py` in a text editor, find line 36, and change:
 ```python
-POST_TIMES = ["08:00", "13:00", "20:00"]
+"privacy_level": "SELF_ONLY",
 ```
+to:
+```python
+"privacy_level": "PUBLIC_TO_EVERYONE",
+```
+
+---
+
+## Part 10 — Turn on automatic posting
+
+This posts 3 videos per day automatically (9am, 2pm, 7pm).
+
+### Windows
+Double-click **`schedule.bat`**
+
+Keep the window open. If you close it, posting stops.
+
+### macOS / Linux
+```bash
+./schedule.sh
+```
+
+Keep the terminal open. Press **Ctrl+C** to stop.
+
+### Changing the post times
+
+Open `main.py` in a text editor and find this line near the top:
+```python
+POST_TIMES = ["09:00", "14:00", "19:00"]
+```
+Change the times to whatever you want (24-hour format). Save the file.
+
+---
+
+## Keeping it running 24/7 (optional)
+
+If you want it to post even when your computer is off, you need to run it on a server.
+
+### Cheapest option: a VPS
+- **DigitalOcean** — $4/month Linux server
+- **Hetzner** — $3/month Linux server
+- Upload this project to the server and run `./schedule.sh` in a `screen` or `tmux` session
+
+### Free option: GitHub Actions
+You can schedule it to run on GitHub's servers. This requires additional setup — ask for help if you want this.
+
+---
+
+## Customization
 
 ### Add your own quotes
 
-Edit `quotes.py` and add to the `QUOTES` list:
+Open `quotes.py` and add to the `QUOTES` list:
 ```python
 ("Your quote here.", "Author Name"),
 ```
 
+### Change the color theme
+
+There are 5 built-in themes (0–4). To preview a specific one:
+
+**Windows:**
+```
+run.bat --preview --theme 3
+```
+
+**Mac/Linux:**
+```bash
+./run.sh --preview --theme 3
+```
+
+### Better AI voice (ElevenLabs)
+
+The default voice is Google TTS (free, robotic). For a more natural voice:
+
+1. Sign up free at **https://elevenlabs.io**
+2. Go to your profile → API Keys → copy your key
+3. Open `.env` and add:
+   ```
+   ELEVENLABS_API_KEY=your_key_here
+   ```
+The program will automatically use ElevenLabs on the next run.
+
+---
+
+## Troubleshooting
+
+### "python is not recognized" (Windows)
+
+Python isn't in your PATH. Fix:
+1. Uninstall Python from Control Panel
+2. Re-install from python.org
+3. Make sure to check **"Add Python to PATH"** during install
+
+### "Permission denied" running setup.sh (Mac/Linux)
+
+```bash
+chmod +x setup.sh
+bash setup.sh
+```
+
+### "No module named X"
+
+The packages didn't install. Run:
+```bash
+# Windows
+venv\Scripts\activate
+pip install -r requirements.txt
+
+# Mac/Linux
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Video is black / no audio
+
+Usually means ffmpeg had an issue. Run `python check_setup.py` and check the ffmpeg line. Then:
+```bash
+pip install --upgrade imageio-ffmpeg
+```
+
+### "TIKTOK_ACCESS_TOKEN not set"
+
+Run `auth.bat` (Windows) or `./auth.sh` (Mac/Linux) to log in again.
+
+### "SPAM_RISK_TOO_MANY_POSTS"
+
+You're posting too fast. Wait 30–60 minutes before trying again, and spread posts out more in `POST_TIMES`.
+
+### "Authorization failed" in browser
+
+Your redirect URI doesn't match. Go to developers.tiktok.com → your app → make sure this is in Redirect URIs:
+```
+http://localhost:8080/callback
+```
+
+### Port 8080 already in use (auth script fails)
+
+Something else is using port 8080. Close other apps and try again, or restart your computer.
+
+### Fonts look wrong / text is tiny
+
+On Linux, install fonts:
+```bash
+sudo apt install fonts-dejavu fonts-liberation
+```
+
+---
+
 ## File structure
 
 ```
-├── main.py              # Entry point + scheduler
-├── video_generator.py   # Creates the video with text + audio
-├── tiktok_uploader.py   # TikTok API upload logic
-├── tiktok_auth.py       # One-time OAuth setup
-├── quotes.py            # Quote database
+├── main.py              # Main program — run this to post
+├── video_generator.py   # Builds the video (background, text, audio)
+├── tiktok_uploader.py   # Handles TikTok API uploads
+├── tiktok_auth.py       # One-time login to TikTok
+├── quotes.py            # Quote library — add your own here
 ├── check_setup.py       # Verifies your environment is ready
-├── requirements.txt
-└── .env.example
+│
+├── setup.bat            # Windows: first-time setup (run once)
+├── run.bat              # Windows: post a video
+├── auth.bat             # Windows: log into TikTok
+├── preview.bat          # Windows: generate test video only
+├── schedule.bat         # Windows: auto-post on a schedule
+│
+├── setup.sh             # Mac/Linux: first-time setup (run once)
+├── run.sh               # Mac/Linux: post a video
+├── auth.sh              # Mac/Linux: log into TikTok
+├── preview.sh           # Mac/Linux: generate test video only
+├── schedule.sh          # Mac/Linux: auto-post on a schedule
+│
+├── requirements.txt     # Python packages (installed automatically)
+├── .env.example         # Credential template
+└── .env                 # Your credentials (never share this)
 ```
+
+---
 
 ## Notes
 
-- Videos are saved to `output_videos/` locally before uploading
-- First posts default to `SELF_ONLY` privacy — change to `PUBLIC_TO_EVERYONE` in `tiktok_uploader.py` when ready
-- TikTok requires AI-generated content to be labeled — the watermark is included automatically
+- The `.env` file contains your private keys — never upload it, share it, or put it on GitHub
+- TikTok access tokens expire — if posting stops working, run the auth script again
+- TikTok requires AI-generated content to be labeled — the "AI Generated" watermark is included automatically
+- The program stays on schedule even if you miss a post time — it just waits for the next one
