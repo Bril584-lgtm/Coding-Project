@@ -1,5 +1,7 @@
 import random
+import requests
 
+# Local fallback list used when all APIs are unavailable
 QUOTES = [
     ("The only way to do great work is to love what you do.", "Steve Jobs"),
     ("It does not matter how slowly you go as long as you do not stop.", "Confucius"),
@@ -34,9 +36,61 @@ QUOTES = [
 ]
 
 
-def get_random_quote() -> tuple[str, str]:
+def _fetch_quotable() -> tuple:
+    """quotable.io — large open quote database, filtered to motivational tags."""
+    tags = "inspirational,motivational,success,wisdom,famous-quotes"
+    resp = requests.get(
+        "https://api.quotable.io/random",
+        params={"tags": tags},
+        timeout=5,
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    return data["content"], data["author"]
+
+
+def _fetch_zenquotes() -> tuple:
+    """zenquotes.io — free API with thousands of quotes."""
+    resp = requests.get("https://zenquotes.io/api/random", timeout=5)
+    resp.raise_for_status()
+    data = resp.json()[0]
+    quote, author = data["q"], data["a"]
+    if quote == "Too many requests. Obtain an auth key for unlimited access." or not quote:
+        raise ValueError("Rate limited")
+    return quote, author
+
+
+def _fetch_type_fit() -> tuple:
+    """type.fit — free, no auth, 1600+ quotes."""
+    resp = requests.get("https://type.fit/api/quotes", timeout=5)
+    resp.raise_for_status()
+    quotes = resp.json()
+    item = random.choice(quotes)
+    author = item.get("author") or "Unknown"
+    # Strip trailing ", type.fit" attribution some entries include
+    author = author.replace(", type.fit", "").strip() or "Unknown"
+    return item["text"], author
+
+
+def get_random_quote() -> tuple:
+    """
+    Try three live APIs in random order, fall back to local list.
+    Returns (quote_text, author).
+    """
+    sources = [_fetch_quotable, _fetch_zenquotes, _fetch_type_fit]
+    random.shuffle(sources)
+
+    for fetch in sources:
+        try:
+            quote, author = fetch()
+            if quote and len(quote) > 10:
+                return quote, author
+        except Exception:
+            continue
+
+    print("All quote APIs unavailable — using local list.")
     return random.choice(QUOTES)
 
 
-def get_quote_by_index(index: int) -> tuple[str, str]:
+def get_quote_by_index(index: int) -> tuple:
     return QUOTES[index % len(QUOTES)]
