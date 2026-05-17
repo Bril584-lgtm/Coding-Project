@@ -62,15 +62,28 @@ def main() -> None:
             check(f"{pip_name} (ElevenLabs voices)", False, f"pip install {pip_name}  (optional — gTTS is used otherwise)")
 
     print("\n--- ffmpeg ---")
-    ffmpeg_path = shutil.which("ffmpeg")
-    ok = ffmpeg_path is not None
-    if sys.platform == "win32":
-        fix = "winget install ffmpeg  OR  choco install ffmpeg  OR download from https://ffmpeg.org/download.html"
-    elif sys.platform == "darwin":
-        fix = "brew install ffmpeg"
-    else:
-        fix = "sudo apt install ffmpeg  OR  sudo dnf install ffmpeg"
-    all_ok &= check("ffmpeg", ok, fix)
+    ffmpeg_ok = False
+
+    # Prefer bundled ffmpeg that ships with imageio-ffmpeg (installed via pip)
+    try:
+        import imageio_ffmpeg
+        bundled = imageio_ffmpeg.get_ffmpeg_exe()
+        if bundled and os.path.exists(bundled):
+            check("ffmpeg (bundled — no install needed)", True)
+            ffmpeg_ok = True
+    except Exception:
+        pass
+
+    if not ffmpeg_ok:
+        system_ffmpeg = shutil.which("ffmpeg")
+        ffmpeg_ok = system_ffmpeg is not None
+        if sys.platform == "win32":
+            fix = "Re-run: pip install imageio-ffmpeg  OR  winget install ffmpeg"
+        elif sys.platform == "darwin":
+            fix = "Re-run: pip install imageio-ffmpeg  OR  brew install ffmpeg"
+        else:
+            fix = "Re-run: pip install imageio-ffmpeg  OR  sudo apt install ffmpeg"
+        all_ok &= check("ffmpeg (system)", ffmpeg_ok, fix)
 
     print("\n--- Fonts ---")
     if sys.platform == "win32":

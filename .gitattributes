@@ -1,0 +1,14 @@
+# Ensure Windows batch files always use CRLF line endings
+*.bat text eol=crlf
+
+# Ensure shell scripts always use LF line endings
+*.sh text eol=lf
+
+# Python files use LF everywhere
+*.py text eol=lf
+
+# Text files auto-detect
+*.md text
+*.txt text
+*.env text
+*.example text

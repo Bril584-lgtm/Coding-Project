@@ -4,6 +4,13 @@ import textwrap
 import tempfile
 from pathlib import Path
 
+# Auto-configure bundled ffmpeg before moviepy loads — no system install needed
+try:
+    import imageio_ffmpeg
+    os.environ.setdefault("IMAGEIO_FFMPEG_EXE", imageio_ffmpeg.get_ffmpeg_exe())
+except Exception:
+    pass
+
 from PIL import Image, ImageDraw, ImageFont
 from gtts import gTTS
 from moviepy.editor import (
